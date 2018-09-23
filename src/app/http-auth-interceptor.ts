@@ -31,18 +31,24 @@ export class HttpAuthInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
-    // Get the auth header from the service.
-    const token: string = localStorage.getItem('token');
-
-    // Clone the request to add the new header.
-    const authReq = req.clone({
-      headers: req.headers.set('token', token ? token : '')
-    });
-
     const authService = this.injector.get(AuthService);
 
-    // Pass on the cloned request instead of the original request.
-    return next.handle(authReq).pipe(
+    if (!this.inflightAuthRequest) {
+      this.inflightAuthRequest = authService.getToken();
+    }
+
+    return this.inflightAuthRequest.pipe(
+      switchMap((newToken: string) => {
+        // unset request inflight
+        this.inflightAuthRequest = null;
+
+        // use the newly returned token
+        const authReq = req.clone({
+          headers: req.headers.set('token', newToken ? newToken : '')
+        });
+
+        return next.handle(authReq);
+      }),
       catchError(error => {
         // checks if a url is to an admin api or not
         if (error.status === 401) {
@@ -75,7 +81,7 @@ export class HttpAuthInterceptor implements HttpInterceptor {
 
               // clone the original request
               const authReqRepeat = req.clone({
-                headers: req.headers.set('', newToken)
+                headers: req.headers.set('token', newToken)
               });
 
               // resend the request
@@ -86,7 +92,7 @@ export class HttpAuthInterceptor implements HttpInterceptor {
           return throwError(error);
         }
       })
-    ) as any;
+    );
   }
 
   blacklistCheckup($url: string): boolean {
