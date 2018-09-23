@@ -179,6 +179,12 @@
   dependencies:
     tslib "^1.9.0"
 
+"@auth0/angular-jwt@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@auth0/angular-jwt/-/angular-jwt-2.0.0.tgz#c0b2861824a24fb62d9d2e1fdb03a326e8a1e203"
+  dependencies:
+    url "^0.11.0"
+
 "@ngtools/webpack@6.1.4":
   version "6.1.4"
   resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-6.1.4.tgz#dab670b4f03a88afd07ed15e1b5f27f16c3be3a8"
